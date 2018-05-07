@@ -25,7 +25,8 @@ public class YTLiveStreaming: NSObject {
 
 extension YTLiveStreaming {
    
-   public func getUpcomingBroadcasts(_ completion: @escaping ([LiveBroadcastStreamModel]?) -> Void) {
+    public func getUpcomingBroadcasts(_ token:String,_ completion: @escaping ([LiveBroadcastStreamModel]?) -> Void) {
+         GoogleOAuth2.sharedInstance.token = token
       YTLiveRequest.listBroadcasts(.upcoming, completion: { broadcasts in
          if let broadcasts = broadcasts {
             self.fillList(broadcasts, completion: completion)
@@ -134,10 +135,10 @@ extension YTLiveStreaming {
       YTLiveRequest.updateLiveBroadcast(broadcast, completion: completion)
    }
    
-   public func startBroadcast(_ broadcast: LiveBroadcastStreamModel, delegate: LiveStreamTransitioning, completion: @escaping (String?, String?, Date?) -> Void) {
+   public func startBroadcast(_ broadcast: LiveBroadcastStreamModel, delegate: YTLiveStreamingDelegate, completion: @escaping (String?, String?, Date?) -> Void) {
       let broadcastId = broadcast.id
       let liveStreamId = broadcast.contentDetails.boundStreamId
-      if !broadcastId.isEmpty &&  !liveStreamId.isEmpty {
+      if broadcastId.characters.count > 0 &&  liveStreamId.characters.count > 0 {
          YTLiveRequest.getLiveBroadcast(broadcastId: broadcastId) { liveBroadcast in
             if let liveBroadcast = liveBroadcast {
                YTLiveRequest.getLiveStream(liveStreamId, completion: { liveStream in
@@ -262,8 +263,8 @@ extension YTLiveStreaming {
       })
    }
    
-   public func isYouTubeAvailable() -> Bool {
-      return GoogleOAuth2.sharedInstance.isAccessTokenPresented
+   public func isYouTubeAvailable(completion: (Bool) -> Void) {
+      GoogleOAuth2.sharedInstance.isAccessTokenPresented(completion: completion)
    }
 }
 
@@ -312,7 +313,7 @@ extension YTLiveStreaming {
          if success {
             print("All right")
          } else {
-            print("Something went wrong")
+            print("ユーチューブのサイトからライフ配信を許可してください。")
          }
          
       })
@@ -320,3 +321,14 @@ extension YTLiveStreaming {
    
 }
 
+// MARK: - GooglePlus API
+
+extension YTLiveStreaming {
+   
+   public func aboutMeInfo(completion: @escaping (GooglePlusAboutMeModel?) -> Void) {
+      GooglePlusRequest.aboutMeInfo(completion: { aboutMeInfo in
+         completion(aboutMeInfo)
+      })
+   }
+   
+}

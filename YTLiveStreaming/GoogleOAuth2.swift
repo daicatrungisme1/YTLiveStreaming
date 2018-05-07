@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import AlamofireOauth2
 import KeychainAccess
 
 // Developer console
@@ -17,12 +18,14 @@ import KeychainAccess
 // For more info see https://developers.google.com/identity/protocols/OAuth2WebServer#handlingtheresponse
 // And https://developers.google.com/+/web/api/rest/oauth
 
-public class GoogleOAuth2: NSObject {
+class GoogleOAuth2: NSObject {
 
+   var _googleOauth2Settings: Oauth2Settings?
    let keychain:  Keychain
    let kOAuth2AccessTokenService: String = "OAuth2AccessToken"
-   
-   public class var sharedInstance: GoogleOAuth2 {
+    var token = ""
+    
+   class var sharedInstance: GoogleOAuth2 {
       struct Singleton {
          static let instance = GoogleOAuth2()
       }
@@ -30,25 +33,37 @@ public class GoogleOAuth2: NSObject {
    }
    
    override init() {
-      self.keychain = Keychain(service: LiveAPI.BaseURL)
+      self.keychain = Keychain(service: Auth.BaseURL)
       super.init()
    }
-
-   var isAccessTokenPresented: Bool {
-      return accessToken != nil
-   }
-
-   public var accessToken: String? {
-      didSet {
-         keychain[kOAuth2AccessTokenService] = accessToken
+   
+   private var googleOauth2Settings: Oauth2Settings {
+      if _googleOauth2Settings == nil {
+         _googleOauth2Settings = Oauth2Settings(baseURL: Auth.BaseURL,
+                                                authorizeURL: Auth.AuthorizeURL,
+                                                tokenURL: Auth.TokenURL,
+                                                redirectURL: Auth.RedirectURL,
+                                                clientID: Credentials.clientID,
+                                                clientSecret: Auth.ClientSecret,
+                                                scope: Auth.Scope)
       }
+      return _googleOauth2Settings!
    }
 
-   public func clearToken() {
-      keychain[kOAuth2AccessTokenService] = nil
+   func requestToken(_ completion: @escaping (String?) -> Void) {    
+         completion(token)
    }
    
-   func requestToken(_ completion: @escaping (String?) -> Void) {
-      completion(accessToken)
+   func clearToken() {
+      Oauth2ClearTokensFromKeychain(googleOauth2Settings)
    }
+   
+   func isAccessTokenPresented(completion: (Bool) -> Void) {
+      if keychain[kOAuth2AccessTokenService] != nil {
+         completion(true)
+      } else {
+         completion(false)
+      }
+   }
+   
 }

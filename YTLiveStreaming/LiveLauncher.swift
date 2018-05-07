@@ -7,9 +7,9 @@
 
 import Foundation
 
-@objc public protocol LiveStreamTransitioning: class {
+@objc public protocol YTLiveStreamingDelegate: class {
    @objc optional func didTransitionToLiveStatus()
-   @objc optional func didTransitionTo(broadcastStatus: String?, streamStatus: String?, healthStatus: String?)
+   @objc optional func didTransitionToStatus(broadcastStatus: String?, streamStatus: String?, healthStatus: String?)
 }
 
 class LiveLauncher: NSObject {
@@ -19,7 +19,7 @@ class LiveLauncher: NSObject {
    fileprivate var liveStream: LiveStreamModel?
    fileprivate var _isLiveStreaming: Bool = false
    
-   var delegate: LiveStreamTransitioning?
+   var delegate: YTLiveStreamingDelegate?
    var youTubeWorker: YTLiveStreaming?
    
    fileprivate var timer: Timer?
@@ -68,7 +68,7 @@ class LiveLauncher: NSObject {
       liveVideoStatusRequestTickTimer()
    }
    
-   @objc func liveVideoStatusRequestTickTimer() {
+   func liveVideoStatusRequestTickTimer() {
       statusRequest() { liveStatus in
          if liveStatus {
             self.isLiveStreaming = true
@@ -94,7 +94,7 @@ class LiveLauncher: NSObject {
             if broadcastStatus == "live" || broadcastStatus == "liveStarting" {
                completion(true)
             } else {
-               self.delegate?.didTransitionTo?(broadcastStatus: broadcastStatus, streamStatus: streamStatus, healthStatus: healthStatus)
+               self.delegate?.didTransitionToStatus?(broadcastStatus: broadcastStatus, streamStatus: streamStatus, healthStatus: healthStatus)
                completion(false)
             }
          }

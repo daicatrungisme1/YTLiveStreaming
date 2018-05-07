@@ -20,7 +20,7 @@ extension Date {
       let dateFormatterDate = DateFormatter()
       dateFormatterDate.dateFormat = "yyyy-MM-dd HH:mm:ss"
       let dateStr = dateFormatterDate.string(from: self)
-      let startDateStr = String(dateStr.map {
+      let startDateStr = String(dateStr.characters.map {
          $0 == " " ? "T" : $0
          })
       let timeZone: TimeZone = TimeZone.autoupdatingCurrent
@@ -42,3 +42,20 @@ func convertJSONtoDate(json: String) -> Date {
    let date = dateFormatterDate.date(from: json)
    return date!
 }
+
+//+ (NSDate*) dateWithJSONString: (NSString*) json {
+//   [NSDateFormatter setDefaultFormatterBehavior:
+//      NSDateFormatterBehavior10_4];
+//   NSDateFormatter *dateFormatter =
+//      [[NSDateFormatter alloc] init];
+//   
+//   [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSz"];
+//   [dateFormatter setTimeZone:[NSTimeZone
+//   timeZoneForSecondsFromGMT:0]];
+//   [dateFormatter setCalendar:[[NSCalendar alloc]
+//   initWithCalendarIdentifier:NSCalendarIdentifierGregorian]];
+//   
+//   NSDate *date = [[NSDate alloc] init];
+//   date = [dateFormatter dateFromString: json];
+//   return date;
+//}
